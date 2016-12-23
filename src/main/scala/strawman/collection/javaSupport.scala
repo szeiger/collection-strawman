@@ -58,7 +58,7 @@ class StringOps(val s: String)
     */
   def ++(xs: IterableOnce[Char]): String = {
     val sb = new StringBuilder() ++= s
-    for (ch <- xs.iterator()) sb += ch
+    for (ch <- xs.iterating) sb += ch
     sb.result
   }
 

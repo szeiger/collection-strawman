@@ -15,7 +15,7 @@ trait Builder[-A, +To] { self =>
 
   /** Bulk append. Can be overridden if specialized implementations are available. */
   def ++=(xs: IterableOnce[A]): this.type = {
-    xs.iterator().foreach(+=)
+    xs.iterating.foreach(+=)
     this
   }
 
@@ -39,7 +39,7 @@ trait Buildable[+A, +Repr] extends Any with IterableMonoTransforms[A, Repr]  {
   /** Optimized, push-based version of `partition`. */
   override def partition(p: A => Boolean): (Repr, Repr) = {
     val l, r = newBuilder
-    coll.iterator().foreach(x => (if (p(x)) l else r) += x)
+    coll.iterating.foreach(x => (if (p(x)) l else r) += x)
     (l.result, r.result)
   }
 

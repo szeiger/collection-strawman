@@ -55,16 +55,16 @@ trait IterableOps[+A] extends Any {
   private def iterator() = coll.iterator()
 
   /** Apply `f` to each element for tis side effects */
-  def foreach(f: A => Unit): Unit = iterator().foreach(f)
+  def foreach(f: A => Unit): Unit = coll.iterating.foreach(f)
 
   /** Fold left */
-  def foldLeft[B](z: B)(op: (B, A) => B): B = iterator().foldLeft(z)(op)
+  def foldLeft[B](z: B)(op: (B, A) => B): B = coll.iterating.foldLeft(z)(op)
 
   /** Fold right */
-  def foldRight[B](z: B)(op: (A, B) => B): B = iterator().foldRight(z)(op)
+  def foldRight[B](z: B)(op: (A, B) => B): B = coll.iterating.foldRight(z)(op)
 
   /** The index of the first element in this collection for which `p` holds. */
-  def indexWhere(p: A => Boolean): Int = iterator().indexWhere(p)
+  def indexWhere(p: A => Boolean): Int = coll.iterating.indexWhere(p)
 
   /** Is the collection empty? */
   def isEmpty: Boolean = !iterator().hasNext
@@ -80,7 +80,7 @@ trait IterableOps[+A] extends Any {
   /** The number of elements in this collection. Does not terminate for
     *  infinite collections.
     */
-  def size: Int = if (knownSize >= 0) knownSize else iterator().length
+  def size: Int = if (knownSize >= 0) knownSize else coll.iterating.length
 
   /** A view representing the elements of this collection. */
   def view: View[A] = View.fromIterator(iterator())

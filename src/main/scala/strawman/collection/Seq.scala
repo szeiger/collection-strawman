@@ -28,7 +28,7 @@ trait LinearSeq[+A] extends Seq[A] with LinearSeqLike[A, LinearSeq] { self =>
   }
 
   /** `length` is defined in terms of `iterator` */
-  def length: Int = iterator().length
+  def length: Int = iterating.length
 
   /** `apply` is defined in terms of `drop`, which is in turn defined in
     *  terms of `tail`.

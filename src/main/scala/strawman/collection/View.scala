@@ -36,7 +36,7 @@ object View {
 
   /** A view that filters an underlying collection. */
   case class Filter[A](underlying: Iterable[A], p: A => Boolean) extends View[A] {
-    def iterator() = underlying.iterator().filter(p)
+    def iterator() = underlying.iterating.filter(p)
   }
 
   /** A view that partitions an underlying collection into two views */
@@ -55,12 +55,12 @@ object View {
 
   /** A view representing one half of a partition. */
   case class Partitioned[A](partition: Partition[A], cond: Boolean) extends View[A] {
-    def iterator() = partition.underlying.iterator().filter(x => partition.p(x) == cond)
+    def iterator() = partition.underlying.iterating.filter(x => partition.p(x) == cond)
   }
 
   /** A view that drops leading elements of the underlying collection. */
   case class Drop[A](underlying: Iterable[A], n: Int) extends View[A] {
-    def iterator() = underlying.iterator().drop(n)
+    def iterator() = underlying.iterating.drop(n)
     protected val normN = n max 0
     override def knownSize =
       if (underlying.knownSize >= 0) (underlying.knownSize - normN) max 0 else -1
@@ -68,7 +68,7 @@ object View {
 
   /** A view that takes leading elements of the underlying collection. */
   case class Take[A](underlying: Iterable[A], n: Int) extends View[A] {
-    def iterator() = underlying.iterator().take(n)
+    def iterator() = underlying.iterating.take(n)
     protected val normN = n max 0
     override def knownSize =
       if (underlying.knownSize >= 0) underlying.knownSize min normN else -1
@@ -76,20 +76,20 @@ object View {
 
   /** A view that maps elements of the underlying collection. */
   case class Map[A, B](underlying: Iterable[A], f: A => B) extends View[B] {
-    def iterator() = underlying.iterator().map(f)
+    def iterator() = underlying.iterating.map(f)
     override def knownSize = underlying.knownSize
   }
 
   /** A view that flatmaps elements of the underlying collection. */
   case class FlatMap[A, B](underlying: Iterable[A], f: A => IterableOnce[B]) extends View[B] {
-    def iterator() = underlying.iterator().flatMap(f)
+    def iterator() = underlying.iterating.flatMap(f)
   }
 
   /** A view that concatenates elements of the underlying collection with the elements
    *  of another collection or iterator.
    */
   case class Concat[A](underlying: Iterable[A], other: IterableOnce[A]) extends View[A] {
-    def iterator() = underlying.iterator() ++ other
+    def iterator() = underlying.iterating ++ other
     override def knownSize = other match {
       case other: Iterable[_] if underlying.knownSize >= 0 && other.knownSize >= 0 =>
         underlying.knownSize + other.knownSize
@@ -102,7 +102,7 @@ object View {
    *  of another collection or iterator.
    */
   case class Zip[A, B](underlying: Iterable[A], other: IterableOnce[B]) extends View[(A, B)] {
-    def iterator() = underlying.iterator().zip(other)
+    def iterator() = underlying.iterating.zip(other)
     override def knownSize = other match {
       case other: Iterable[_] => underlying.knownSize min other.knownSize
       case _ => -1
