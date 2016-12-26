@@ -3,17 +3,18 @@ package strawman.collection.immutable
 import scala.annotation.unchecked.uncheckedVariance
 import scala.Nothing
 import scala.Predef.???
-import strawman.collection.{Iterable, IterableFactory, IterableOnce, LinearSeq, SeqLike}
+import strawman.collection.{IterableFactory, IterableOnce, LinearSeq, SeqLike}
 import strawman.collection.mutable.{Buildable, ListBuffer}
 
 
 /** Concrete collection type: List */
 sealed trait List[+A]
-  extends LinearSeq[A]
+  extends Seq[A]
+    with LinearSeq[A]
     with SeqLike[A, List]
     with Buildable[A, List[A]] {
 
-  def fromIterable[B](c: Iterable[B]): List[B] = List.fromIterable(c)
+  def fromIterable[B](c: strawman.collection.Iterable[B]): List[B] = List.fromIterable(c)
 
   protected[this] def newBuilder = new ListBuffer[A].mapResult(_.toList)
 
@@ -48,7 +49,7 @@ case object Nil extends List[Nothing] {
 }
 
 object List extends IterableFactory[List] {
-  def fromIterable[B](coll: Iterable[B]): List[B] = coll match {
+  def fromIterable[B](coll: strawman.collection.Iterable[B]): List[B] = coll match {
     case coll: List[B] => coll
     case _ => ListBuffer.fromIterable(coll).toList
   }

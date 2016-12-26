@@ -5,7 +5,7 @@ import scala.reflect.ClassTag
 import scala.{Int, Boolean, Array, Any, Unit, StringContext}
 import java.lang.String
 
-import strawman.collection.mutable.{ArrayBuffer, StringBuilder}
+import strawman.collection.mutable.{ArrayBuffer, StringBuilder, Iterator}
 
 /** Base trait for generic collections */
 trait Iterable[+A] extends IterableOnce[A] with IterableLike[A, Iterable] {
@@ -52,7 +52,7 @@ trait IterableFactory[+C[X] <: Iterable[X]] extends FromIterable[C] {
   */
 trait IterableOps[+A] extends Any {
   protected def coll: Iterable[A]
-  private def iterator() = coll.iterator()
+  private def iterator(): Iterator[A] = coll.iterator()
 
   /** Apply `f` to each element for tis side effects */
   def foreach(f: A => Unit): Unit = iterator().foreach(f)
@@ -83,7 +83,7 @@ trait IterableOps[+A] extends Any {
   def size: Int = if (knownSize >= 0) knownSize else iterator().length
 
   /** A view representing the elements of this collection. */
-  def view: View[A] = View.fromIterator(iterator())
+  def view: View[A] = View.fromIterator[A](iterator())
 
   /** Given a collection factory `fi` for collections of type constructor `C`,
     *  convert this collection to one of type `C[A]`. Example uses:
@@ -132,6 +132,17 @@ trait IterableOps[+A] extends Any {
   }
 
   override def toString = s"$className(${mkString(", ")})"
+
+  def sameElements[B >: A](that: Iterable[B]): Boolean = {
+    val these = this.iterator()
+    val those = that.iterator()
+    while (these.hasNext && those.hasNext)
+      if (these.next() != those.next())
+        return false
+
+    !these.hasNext && !those.hasNext
+  }
+
 }
 
 /** Type-preserving transforms over iterables.
