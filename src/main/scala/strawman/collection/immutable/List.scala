@@ -3,7 +3,7 @@ package strawman.collection.immutable
 import scala.annotation.unchecked.uncheckedVariance
 import scala.Nothing
 import scala.Predef.???
-import strawman.collection.{Iterable, IterableFactory, IterableOnce, LinearSeq, SeqLike}
+import strawman.collection.{Iterable, IterableFactory, LinearSeq, SeqLike}
 import strawman.collection.mutable.{Buildable, ListBuffer}
 
 
@@ -26,7 +26,7 @@ sealed trait List[+A]
     else prefix.head :: prefix.tail ++: this
 
   /** When concatenating with another list `xs`, avoid copying `xs` */
-  override def ++[B >: A](xs: IterableOnce[B]): List[B] = xs match {
+  override def ++[B >: A](xs: Iterable[B]): List[B] = xs match {
     case xs: List[B] => this ++: xs
     case _ => super.++(xs)
   }

@@ -81,14 +81,14 @@ object View {
   }
 
   /** A view that flatmaps elements of the underlying collection. */
-  case class FlatMap[A, B](underlying: Iterable[A], f: A => IterableOnce[B]) extends View[B] {
+  case class FlatMap[A, B](underlying: Iterable[A], f: A => Iterable[B]) extends View[B] {
     def iterator() = underlying.iterating.flatMap(f)
   }
 
   /** A view that concatenates elements of the underlying collection with the elements
    *  of another collection or iterator.
    */
-  case class Concat[A](underlying: Iterable[A], other: IterableOnce[A]) extends View[A] {
+  case class Concat[A](underlying: Iterable[A], other: Iterable[A]) extends View[A] {
     def iterator() = underlying.iterating ++ other
     override def knownSize = other match {
       case other: Iterable[_] if underlying.knownSize >= 0 && other.knownSize >= 0 =>
@@ -101,7 +101,7 @@ object View {
   /** A view that zips elements of the underlying collection with the elements
    *  of another collection or iterator.
    */
-  case class Zip[A, B](underlying: Iterable[A], other: IterableOnce[B]) extends View[(A, B)] {
+  case class Zip[A, B](underlying: Iterable[A], other: Iterable[B]) extends View[(A, B)] {
     def iterator() = underlying.iterating.zip(other)
     override def knownSize = other match {
       case other: Iterable[_] => underlying.knownSize min other.knownSize

@@ -2,7 +2,7 @@ package strawman.collection.mutable
 
 import scala.{Boolean, Any, Char}
 import java.lang.String
-import strawman.collection.{IterableMonoTransforms, IterableOnce}
+import strawman.collection.{Iterable, IterableMonoTransforms}
 
 /** Base trait for collection builders */
 trait Builder[-A, +To] { self =>
@@ -14,7 +14,7 @@ trait Builder[-A, +To] { self =>
   def result: To
 
   /** Bulk append. Can be overridden if specialized implementations are available. */
-  def ++=(xs: IterableOnce[A]): this.type = {
+  def ++=(xs: Iterable[A]): this.type = {
     xs.iterating.foreach(+=)
     this
   }
@@ -22,7 +22,7 @@ trait Builder[-A, +To] { self =>
   /** A builder resulting from this builder my mapping the result using `f`. */
   def mapResult[NewTo](f: To => NewTo) = new Builder[A, NewTo] {
     def +=(x: A): this.type = { self += x; this }
-    override def ++=(xs: IterableOnce[A]): this.type = { self ++= xs; this }
+    override def ++=(xs: Iterable[A]): this.type = { self ++= xs; this }
     def result: NewTo = f(self.result)
   }
 }

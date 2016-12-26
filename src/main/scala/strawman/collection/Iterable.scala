@@ -2,15 +2,160 @@ package strawman.collection
 
 import scala.annotation.unchecked.uncheckedVariance
 import scala.reflect.ClassTag
-import scala.{Int, Boolean, Array, Any, Unit, StringContext}
+import scala.{Any, AnyVal, Array, Boolean, Int, StringContext, Unit}
 import java.lang.String
 
-import strawman.collection.mutable.{ArrayBuffer, StringBuilder}
+import strawman.collection.mutable.{ArrayBuffer, Iterator, StringBuilder}
 
 /** Base trait for generic collections */
-trait Iterable[+A] extends IterableOnce[A] with IterableLike[A, Iterable] {
+trait Iterable[+A] extends IterableLike[A, Iterable] {
   /** The collection itself */
   protected def coll: this.type = this
+
+  /** Iterator can be used only once */
+  def iterator(): Iterator[A]
+
+  /** Operations based on the underlying `Iterator` */
+  final def iterating: Iterating[A] = new Iterating(this)
+
+}
+
+/** Low-level operations based on the underlying `Iterator` of an `Iterable` */
+class Iterating[+A](val iterable: Iterable[A]) extends AnyVal {
+
+  def foldLeft[B](z: B)(op: (B, A) => B): B = {
+    val it = iterable.iterator()
+    var b = z
+    while (it.hasNext) {
+      b = op(b, it.next())
+    }
+    b
+  }
+
+  def foldRight[B](z: B)(op: (A, B) => B): B = {
+    val it = iterable.iterator()
+    def loop(): B = if (it.hasNext) op(it.next(), loop()) else z
+    loop()
+  }
+
+  def foreach(f: A => Unit): Unit = {
+    val it = iterable.iterator()
+    while (it.hasNext) f(it.next())
+  }
+
+  def indexWhere(p: A => Boolean): Int = {
+    val it = iterable.iterator()
+    var i = 0
+    while (it.hasNext) {
+      if (p(it.next())) return i
+      i += 1
+    }
+    -1
+  }
+
+  def length: Int = {
+    val it = iterable.iterator()
+    var len = 0
+    while (it.hasNext) { len += 1; it.next() }
+    len
+  }
+
+  def filter(p: A => Boolean): Iterator[A] = {
+    val it = iterable.iterator()
+    new Iterator[A] {
+      private var hd: A = _
+      private var hdDefined: Boolean = false
+
+      def hasNext: Boolean = hdDefined || {
+        do {
+          if (!it.hasNext) return false
+          hd = it.next()
+        } while (!p(hd))
+        hdDefined = true
+        true
+      }
+
+      def next() =
+        if (hasNext) {
+          hdDefined = false
+          hd
+        }
+        else Iterator.empty.next()
+    }
+  }
+
+  def map[B](f: A => B): Iterator[B] = {
+    val it = iterable.iterator()
+    new Iterator[B] {
+      def hasNext = it.hasNext
+      def next() = f(it.next())
+    }
+  }
+
+  def flatMap[B](f: A => Iterable[B]): Iterator[B] = {
+    val it = iterable.iterator()
+    new Iterator[B] {
+      private var myCurrent: Iterator[B] = Iterator.empty
+      private def current = {
+        while (!myCurrent.hasNext && it.hasNext)
+          myCurrent = f(it.next()).iterator()
+        myCurrent
+      }
+      def hasNext = current.hasNext
+      def next() = current.next()
+    }
+  }
+
+  def ++ [B >: A](bs: Iterable[B]): Iterator[B] = {
+    val it = iterable.iterator()
+    new Iterator[B] {
+      private var myCurrent: Iterator[B] = it
+      private var first = true
+      private def current = {
+        if (!myCurrent.hasNext && first) {
+          myCurrent = bs.iterator()
+          first = false
+        }
+        myCurrent
+      }
+      def hasNext = current.hasNext
+      def next() = current.next()
+    }
+  }
+
+  def take(n: Int): Iterator[A] = {
+    val it = iterable.iterator()
+    new Iterator[A] {
+      private var i = 0
+      def hasNext = it.hasNext && i < n
+      def next() =
+        if (hasNext) {
+          i += 1
+          it.next()
+        }
+        else Iterator.empty.next()
+    }
+  }
+
+  def drop(n: Int): Iterator[A] = {
+    val it = iterable.iterator()
+    var i = 0
+    while (i < n && it.hasNext) {
+      it.next()
+      i += 1
+    }
+    it
+  }
+
+  def zip[B](that: Iterable[B]): Iterator[(A, B)] = {
+    val it = iterable.iterator()
+    new Iterator[(A, B)] {
+      val thatIterator = that.iterator()
+      def hasNext = it.hasNext && thatIterator.hasNext
+      def next() = (it.next(), thatIterator.next())
+    }
+  }
+
 }
 
 /** Base trait for Iterable operations
@@ -52,7 +197,7 @@ trait IterableFactory[+C[X] <: Iterable[X]] extends FromIterable[C] {
   */
 trait IterableOps[+A] extends Any {
   protected def coll: Iterable[A]
-  private def iterator() = coll.iterator()
+  private def iterator(): Iterator[A] = coll.iterator()
 
   /** Apply `f` to each element for tis side effects */
   def foreach(f: A => Unit): Unit = coll.iterating.foreach(f)
@@ -179,12 +324,12 @@ trait IterablePolyTransforms[+A, +C[A]] extends Any {
   def map[B](f: A => B): C[B] = fromIterable(View.Map(coll, f))
 
   /** Flatmap */
-  def flatMap[B](f: A => IterableOnce[B]): C[B] = fromIterable(View.FlatMap(coll, f))
+  def flatMap[B](f: A => Iterable[B]): C[B] = fromIterable(View.FlatMap(coll, f))
 
   /** Concatenation */
-  def ++[B >: A](xs: IterableOnce[B]): C[B] = fromIterable(View.Concat(coll, xs))
+  def ++[B >: A](xs: Iterable[B]): C[B] = fromIterable(View.Concat(coll, xs))
 
   /** Zip. Interesting because it requires to align to source collections. */
-  def zip[B](xs: IterableOnce[B]): C[(A @uncheckedVariance, B)] = fromIterable(View.Zip(coll, xs))
+  def zip[B](xs: Iterable[B]): C[(A @uncheckedVariance, B)] = fromIterable(View.Zip(coll, xs))
   // sound bcs of VarianceNote
 }

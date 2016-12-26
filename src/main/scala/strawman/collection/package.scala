@@ -22,7 +22,7 @@ import strawman.collection.mutable.{ArrayBuffer, Buildable}
  *
  *  1. Collection base types:
  *
- *         IterableOnce, Iterable, Seq, LinearSeq, View, IndexedView
+ *         Iterable, Seq, LinearSeq, View, IndexedView
  *
  *  2. Collection creator base types:
  *

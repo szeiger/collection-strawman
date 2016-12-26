@@ -2,7 +2,7 @@ package strawman.collection.mutable
 
 import scala.{Array, Int, Boolean, Unit, AnyRef}
 import scala.Predef.intWrapper
-import strawman.collection.{IndexedView, Iterable, IterableFactory, IterableOnce, Seq, SeqLike}
+import strawman.collection.{IndexedView, Iterable, IterableFactory, Seq, SeqLike}
 
 /** Concrete collection type: ArrayBuffer */
 class ArrayBuffer[A] private (initElems: Array[AnyRef], initLength: Int)
@@ -55,7 +55,7 @@ class ArrayBuffer[A] private (initElems: Array[AnyRef], initLength: Int)
   def trimStart(n: Int): Unit = start += (n max 0)
 
   /** Overridden to use array copying for efficiency where possible. */
-  override def ++[B >: A](xs: IterableOnce[B]): ArrayBuffer[B] = xs match {
+  override def ++[B >: A](xs: Iterable[B]): ArrayBuffer[B] = xs match {
     case xs: ArrayBuffer[B] =>
       val elems = new Array[AnyRef](length + xs.length)
       Array.copy(this.elems, this.start, elems, 0, this.length)
