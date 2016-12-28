@@ -16,8 +16,7 @@ trait Seq[+A] extends Iterable[A] with SeqLike[A, Seq] with ArrayLike[A]
 trait LinearSeq[+A]
   extends Seq[A]
     with LinearSeqLike[A, LinearSeq]
-    with IterableLikeFromIterable[A, LinearSeq]
-    with SeqMonoTransformsFromIterable[A, LinearSeq[A @uncheckedVariance]] { self =>  // sound bcs of VarianceNote
+    with SeqMonoTransforms[A, LinearSeq[A]] { self =>
 
   /** To be overridden in implementations: */
   def isEmpty: Boolean
@@ -58,6 +57,11 @@ trait SeqLike[+A, +C[X] <: Seq[X]]
   extends IterableLike[A, C]
     with SeqMonoTransforms[A, C[A @uncheckedVariance]] // sound bcs of VarianceNote
 
+trait SeqLikeFromIterable[+A, +C[X] <: Seq[X]]
+  extends SeqLike[A, C]
+    with IterableLikeFromIterable[A, C]
+    with SeqMonoTransformsFromIterable[A, C[A @uncheckedVariance]] // sound bcs of VarianceNote
+
 /** Base trait for linear Seq operations */
 trait LinearSeqLike[+A, +C[X] <: LinearSeq[X]] extends SeqLike[A, C] {
 
@@ -67,15 +71,15 @@ trait LinearSeqLike[+A, +C[X] <: LinearSeq[X]] extends SeqLike[A, C] {
     *  whereas we need to assume here that `Repr` is the same as the underlying
     *  collection type.
     */
-  override def drop(n: Int): C[A @uncheckedVariance] = { // sound bcs of VarianceNote
-  def loop(n: Int, s: Iterable[A]): C[A] =
-    if (n <= 0) s.asInstanceOf[C[A]]
-    // implicit contract to guarantee success of asInstanceOf:
-    //   (1) coll is of type C[A]
-    //   (2) The tail of a LinearSeq is of the same type as the type of the sequence itself
-    // it's surprisingly tricky/ugly to turn this into actual types, so we
-    // leave this contract implicit.
-    else loop(n - 1, s.tail)
+  def drop(n: Int): C[A @uncheckedVariance] = { // sound bcs of VarianceNote
+    def loop(n: Int, s: Iterable[A]): C[A] =
+      if (n <= 0) s.asInstanceOf[C[A]]
+      // implicit contract to guarantee success of asInstanceOf:
+      //   (1) coll is of type C[A]
+      //   (2) The tail of a LinearSeq is of the same type as the type of the sequence itself
+      // it's surprisingly tricky/ugly to turn this into actual types, so we
+      // leave this contract implicit.
+      else loop(n - 1, s.tail)
     loop(n, coll)
   }
 }

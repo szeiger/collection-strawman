@@ -1,13 +1,13 @@
 package strawman.collection.mutable
 
 import scala.{Int, Unit}
-import strawman.collection.{SeqLike, IterableFactory, Iterable, Seq}
-import strawman.collection.immutable.{List, Nil, ::}
+import strawman.collection.{Iterable, IterableFactory, Seq, SeqLikeFromIterable}
+import strawman.collection.immutable.{::, List, Nil}
 
 /** Concrete collection type: ListBuffer */
 class ListBuffer[A]
   extends Seq[A]
-    with SeqLike[A, ListBuffer]
+    with SeqLikeFromIterable[A, ListBuffer]
     with Buildable[A, ListBuffer[A]]
     with Builder[A, ListBuffer[A]] {
 

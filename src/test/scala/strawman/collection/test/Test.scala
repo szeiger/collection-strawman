@@ -2,7 +2,7 @@ package strawman.collection.test
 
 import java.lang.String
 import scala.{Int, Unit, Array, StringContext, Boolean, Any, Char}
-import scala.Predef.{println, charWrapper}
+import scala.Predef.{println, charWrapper, identity}
 
 import strawman.collection._
 import strawman.collection.immutable.{List, Nil, ::, View, LazyList}
