@@ -15,7 +15,6 @@ trait Seq[+A] extends Iterable[A] with SeqLike[A, Seq] with ArrayLike[A]
   */
 trait LinearSeq[+A]
   extends Seq[A]
-    with LinearSeqLike[A, LinearSeq]
     with SeqMonoTransforms[A, LinearSeq[A]] { self =>
 
   /** To be overridden in implementations: */
@@ -23,7 +22,7 @@ trait LinearSeq[+A]
   def head: A
   def tail: LinearSeq[A]
 
-  /** `iterator` is overridden in terms of `head` and `tail` */
+  /** `iterator` is defined in terms of `head` and `tail` */
   def iterator() = new Iterator[A] {
     private[this] var current: Seq[A] = self
     def hasNext = !current.isEmpty
@@ -36,7 +35,7 @@ trait LinearSeq[+A]
   /** `apply` is defined in terms of `drop`, which is in turn defined in
     *  terms of `tail`.
     */
-  override def apply(n: Int): A = {
+  def apply(n: Int): A = {
     if (n < 0) throw new IndexOutOfBoundsException(n.toString)
     val skipped = drop(n)
     if (skipped.isEmpty) throw new IndexOutOfBoundsException(n.toString)
@@ -62,8 +61,8 @@ trait SeqLikeFromIterable[+A, +C[X] <: Seq[X]]
     with IterableLikeFromIterable[A, C]
     with SeqMonoTransformsFromIterable[A, C[A @uncheckedVariance]] // sound bcs of VarianceNote
 
-/** Base trait for linear Seq operations */
-trait LinearSeqLike[+A, +C[X] <: LinearSeq[X]] extends SeqLike[A, C] {
+/** Base trait for linear Seq optimizations */
+trait LinearSeqLikeOpt[+A, +C[X] <: LinearSeq[X]] extends SeqLike[A, C] {
 
   /** Optimized version of `drop` that avoids copying
     *  Note: `drop` is defined here, rather than in a trait like `LinearSeqMonoTransforms`,

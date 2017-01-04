@@ -36,9 +36,6 @@ class LazyList[+A](expr: => LazyList.Evaluated[A])
       }
     else "LazyList(?)"
 
-  // HACK Needed because we inherit from two implementations (one from LinearSeq and one from SeqLikeFromIterable)
-  override def drop(n: Int): LazyList[A] = super.drop(n)
-
 }
 
 object LazyList extends IterableFactory[LazyList] {

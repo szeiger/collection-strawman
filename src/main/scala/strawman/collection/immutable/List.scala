@@ -3,7 +3,7 @@ package strawman.collection.immutable
 import scala.annotation.unchecked.uncheckedVariance
 import scala.{Int, Nothing}
 import scala.Predef.???
-import strawman.collection.{Iterable, IterableFactory, IterableOnce, LinearSeq, LinearSeqLike, SeqLikeFromIterable}
+import strawman.collection.{Iterable, IterableFactory, IterableOnce, LinearSeq, LinearSeqLikeOpt, SeqLikeFromIterable}
 import strawman.collection.mutable.{Buildable, ListBuffer}
 
 
@@ -11,7 +11,8 @@ import strawman.collection.mutable.{Buildable, ListBuffer}
 sealed trait List[+A]
   extends LinearSeq[A]
     with SeqLikeFromIterable[A, List]
-    with Buildable[A, List[A]] {
+    with Buildable[A, List[A]]
+    with LinearSeqLikeOpt[A, List] { // We put the optimizations at the end
 
   def fromIterable[B](c: Iterable[B]): List[B] = List.fromIterable(c)
 
@@ -33,7 +34,8 @@ sealed trait List[+A]
 
   override def className = "List"
 
-  // HACK Needed because we inherit from two implementations (one from LinearSeq and one from SeqLikeFromIterable)
+  // We need to disambiguate which implementation of `drop` we want to use because we inherit
+  // from two implementations (one from LinearSeqLikeOpt and one from SeqLikeFromIterable)
   override def drop(n: Int): List[A] = super.drop(n)
 
 }
