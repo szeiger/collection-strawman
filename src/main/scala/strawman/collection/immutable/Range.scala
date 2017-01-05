@@ -51,16 +51,7 @@ final class Range(
     with SeqMonoTransformsFromIterable[Int, IndexedSeq[Int]]
     with Serializable { range =>
 
-  def iterator(): Iterator[Int] =
-    new Iterator[Int] {
-      private var current: Seq[Int] = range
-      def next() = {
-        val x = current.head
-        current = current.tail
-        x
-      }
-      def hasNext = !current.isEmpty
-    }
+  def iterator(): Iterator[Int] = new RangeIterator(start, step, lastElement, isEmpty)
 
   private def gap           = end.toLong - start.toLong
   private def isExact       = gap % step == 0
@@ -277,4 +268,25 @@ object Range {
 
 
 
+}
+
+/**
+  * @param lastElement The last element included in the Range
+  * @param initiallyEmpty Whether the Range was initially empty or not
+  */
+private class RangeIterator(
+  start: Int,
+  step: Int,
+  lastElement: Int,
+  initiallyEmpty: Boolean
+) extends Iterator[Int] {
+  private var _hasNext: Boolean = !initiallyEmpty
+  private var _next: Int = start
+  def hasNext: Boolean = _hasNext
+  def next(): Int = {
+    val value = _next
+    _hasNext = value != lastElement
+    _next = value + step
+    value
+  }
 }
