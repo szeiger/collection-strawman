@@ -64,7 +64,7 @@ final class Range(
       || (start == end && !isInclusive)
     )
 
-  private val numRangeElements: Int = {
+  val length: Int = {
     if (step == 0) throw new IllegalArgumentException("step cannot be 0.")
     else if (isEmpty) 0
     else {
@@ -100,8 +100,8 @@ final class Range(
   override def tail: Range = {
     if (isEmpty)
       Nil.tail
-
-    drop(1)
+    if (length == 1) newEmptyRange(end)
+    else new Range(start + step, end, step, isInclusive)
   }
 
   protected def copy(start: Int = start, end: Int = end, step: Int = step, isInclusive: Boolean = isInclusive): Range =
@@ -115,8 +115,7 @@ final class Range(
   def by(step: Int): Range = copy(start, end, step)
 
   // Override for performance
-  override def size: Int = numRangeElements
-  def length: Int = numRangeElements
+  override def size: Int = length
 
   // Check cannot be evaluated eagerly because we have a pattern where
   // ranges are constructed like: "x to y by z" The "x to y" piece
@@ -124,7 +123,7 @@ final class Range(
   // which means it will not fail fast for those cases where failing was
   // correct.
   private def validateMaxLength() {
-    if (numRangeElements < 0)
+    if (length < 0)
       fail()
   }
   private def description = "%d %s %d by %s".format(start, if (isInclusive) "to" else "until", end, step)
@@ -132,7 +131,7 @@ final class Range(
 
   def apply(idx: Int): Int = {
     validateMaxLength()
-    if (idx < 0 || idx >= numRangeElements) throw new IndexOutOfBoundsException(idx.toString)
+    if (idx < 0 || idx >= length) throw new IndexOutOfBoundsException(idx.toString)
     else start + (step * idx)
   }
 
@@ -162,7 +161,7 @@ final class Range(
     */
   override def take(n: Int): Range =
     if (n <= 0 || isEmpty) newEmptyRange(start)
-    else if (n >= numRangeElements && numRangeElements >= 0) this
+    else if (n >= length && length >= 0) this
     else {
       // May have more than Int.MaxValue elements in range (numRangeElements < 0)
       // but the logic is the same either way: take the first n
@@ -176,7 +175,7 @@ final class Range(
     */
   override def drop(n: Int): Range =
     if (n <= 0 || isEmpty) this
-    else if (n >= numRangeElements && numRangeElements >= 0) newEmptyRange(end)
+    else if (n >= length && length >= 0) newEmptyRange(end)
     else {
       // May have more than Int.MaxValue elements (numRangeElements < 0)
       // but the logic is the same either way: go forwards n steps, keep the rest
