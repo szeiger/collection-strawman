@@ -3,7 +3,7 @@ package strawman.collection.immutable
 import strawman.collection.mutable.{ArrayBuffer, ArrayBufferView, Iterator}
 import strawman.collection.{Iterable, IterableFactory, IterableOnce, IndexedSeq, Seq, SeqLike}
 
-import scala.{AnyRef, Boolean, Int}
+import scala.{Any, Boolean, Int}
 import scala.Predef.{???, intWrapper}
 
 /**
@@ -11,13 +11,13 @@ import scala.Predef.{???, intWrapper}
   *
   * Supports efficient indexed access and has a small memory footprint.
   */
-class Array[+A] private (private val elements: scala.Array[AnyRef]) extends IndexedSeq[A] with SeqLike[A, Array] {
+class Array[+A] private (private val elements: scala.Array[Any]) extends IndexedSeq[A] with SeqLike[A, Array] {
 
   def length: Int = elements.length
 
   override def knownSize: Int = elements.length
 
-  def apply(i: Int): A = elements(i).asInstanceOf[A]
+  def apply(i: Int): A = scala.runtime.ScalaRunTime.array_apply(elements, i).asInstanceOf[A]
 
   def iterator(): Iterator[A] = view.iterator()
 
@@ -28,7 +28,7 @@ class Array[+A] private (private val elements: scala.Array[AnyRef]) extends Inde
   def ++[B >: A](xs: IterableOnce[B]): Array[B] =
     xs match {
       case bs: Array[B] =>
-        val dest = scala.Array.ofDim[AnyRef](length + bs.length)
+        val dest = scala.Array.ofDim[Any](length + bs.length)
         java.lang.System.arraycopy(elements, 0, dest, 0, length)
         java.lang.System.arraycopy(bs.elements, 0, dest, length, bs.length)
         new Array(dest)
@@ -67,15 +67,15 @@ class Array[+A] private (private val elements: scala.Array[AnyRef]) extends Inde
 object Array extends IterableFactory[Array] {
 
   def fromIterable[A](it: Iterable[A]): Array[A] =
-    new Array(ArrayBuffer.fromIterable(it).asInstanceOf[ArrayBuffer[AnyRef]].toArray)
+    new Array(ArrayBuffer.fromIterable(it).asInstanceOf[ArrayBuffer[Any]].toArray)
 
   def fill[A](n: Int)(elem: => A): Array[A] = tabulate(n)(_ => elem)
 
   def tabulate[A](n: Int)(f: Int => A): Array[A] = {
-    val elements = scala.Array.ofDim[AnyRef](n)
+    val elements = scala.Array.ofDim[Any](n)
     var i = 0
     while (i < n) {
-      elements(i) = f(i).asInstanceOf[AnyRef]
+      elements(i) = f(i).asInstanceOf[Any]
       i = i + 1
     }
     new Array(elements)
