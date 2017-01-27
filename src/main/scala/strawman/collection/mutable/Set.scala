@@ -5,13 +5,16 @@ import strawman.collection.IterableOnce
 import scala.{Int, Boolean, Unit, Option, Some, None}
 import scala.Predef.???
 
-trait Set[A] extends collection.Set[A] with Growable[A] {
+/** Base trait for mutable sets */
+trait Set[A]
+  extends collection.Set[A]
+    with collection.SetLike[A, Set]
+    with Growable[A] {
 
   def +=(elem: A): this.type
   def -=(elem: A): this.type
 
-  def contains(elem: A): Boolean
-  def get(elem: A): Option[A]
+  def get(elem: A): Option[A] = if (contains(elem)) Some(elem) else None
 
   def insert(elem: A): Boolean =
     !contains(elem) && { +=(elem); true }
@@ -57,6 +60,7 @@ trait Set[A] extends collection.Set[A] with Growable[A] {
       -=(elem)
   }
 }
+
 object Set {
-  def apply[A](xs: A*): Set[A] = ???
+  def apply[A](xs: A*): Set[A] = HashSet(xs: _*)
 }
