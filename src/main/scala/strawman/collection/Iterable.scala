@@ -33,7 +33,7 @@ trait IterableLike[+A, +C[X] <: Iterable[X]]
   /** Create a collection of type `C[A]` from the elements of `coll`, which has
     *  the same element type as this collection. Overridden in StringOps and ArrayOps.
     */
-  protected[this] def fromIterableWithSameElemType(coll: Iterable[A]): C[A]
+  protected[this] def fromIterableWithSameElemType(coll: Iterable[A]): C[A] = fromIterable(coll)
 }
 
 /** Base trait for instances that can construct a collection from an iterable */

@@ -14,7 +14,6 @@ trait Map[K, +V]
 /** Base Map implementation type */
 trait MapLike[K, +V, +C[X, Y] <: Map[X, Y]]
   extends IterableLike[(K, V), Iterable]
-    with IterableMonoTransforms[(K, V), C[K, V @uncheckedVariance]]
     with MapPolyTransforms[K, V, C] {
 
   def get(key: K): Option[V]

@@ -13,8 +13,6 @@ trait View[+A] extends Iterable[A] with IterableLike[A, View] {
     case _ => View.fromIterator(c.iterator())
   }
 
-  protected[this] def fromIterableWithSameElemType(coll: Iterable[A]): View[A] = fromIterable(coll)
-
   override def className = "View"
 }
 

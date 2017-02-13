@@ -30,9 +30,6 @@ final class HashMap[K, V]
 
   // From IterablePolyTransforms
   def fromIterable[B](coll: strawman.collection.Iterable[B]): Iterable[B] = ???
-  // From IterableMonoTransforms
-  protected[this] def fromIterableWithSameElemType(coll: strawman.collection.Iterable[(K, V)]): HashMap[K, V] = ???
-
 }
 
 object HashMap extends MapFactories[HashMap] {
