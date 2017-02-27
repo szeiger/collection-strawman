@@ -108,6 +108,11 @@ trait IterableOps[+A] extends Any {
     if (knownSize >= 0) copyToArray(new Array[B](knownSize), 0)
     else ArrayBuffer.fromIterable(coll).toArray[B]
 
+  // Just to test what's possible with the preferred and fallback types. This should be changed
+  // to require an `fi.BuildPreferred` to that it can't fall back to the unconstrained type.
+  def to[To](fi: ConstrainedFromIterable)(implicit build: fi.Build[A @uncheckedVariance, To]): To =
+    fi.constrainedFromIterable(coll)
+
   /** Copy all elements of this collection to array `xs`, starting at `start`. */
   def copyToArray[B >: A](xs: Array[B], start: Int = 0): xs.type = {
     var i = start

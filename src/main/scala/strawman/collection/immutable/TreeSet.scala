@@ -1,7 +1,7 @@
 package strawman.collection.immutable
 
 import strawman.collection.mutable.Builder
-import strawman.collection.{Iterator, OrderingGuidedFactories}
+import strawman.collection.{ConstrainedIterableFactory, ConstrainedIterablePolyTransforms, Iterator}
 
 import scala.{Boolean, Ordering}
 import scala.Predef.???
@@ -9,7 +9,8 @@ import scala.Predef.???
 /** Immutable sorted set backed by a tree */
 final class TreeSet[A]()(implicit val ordering: Ordering[A])
   extends SortedSet[A]
-    with SortedSetLike[A, TreeSet]{
+    with SortedSetLike[A, TreeSet]
+    with ConstrainedIterablePolyTransforms[A, Set, TreeSet.type] {
 
   // From IterableOnce
   def iterator(): Iterator[A] = ???
@@ -17,6 +18,9 @@ final class TreeSet[A]()(implicit val ordering: Ordering[A])
   // From IterablePolyTransforms
   def fromIterable[B](coll: strawman.collection.Iterable[B]): Set[B] = ???
   protected[this] def fromIterableWithSameElemType(coll: strawman.collection.Iterable[A]): TreeSet[A] = TreeSet.builder[A].++=(coll).result
+
+  // From ConstrainedIterablePolyTransforms
+  def constrainedFromIterable[E, To](coll: strawman.collection.Iterable[E])(implicit ev: TreeSet.type#Build[E, To]): To = ???
 
   // From SetLike
   def contains(elem: A): Boolean = ???
@@ -32,14 +36,12 @@ final class TreeSet[A]()(implicit val ordering: Ordering[A])
 
   // From SortedLike
   def range(from: A, until: A): TreeSet[A] = ???
-
-  // From SortedPolyTransforms
-  def map[B](f: (A) => B)(implicit ordering: Ordering[B]): TreeSet[B] = ???
-
 }
 
-object TreeSet extends OrderingGuidedFactories[TreeSet] {
+object TreeSet extends SortedSetFactory {
+  type Preferred[E] = TreeSet[E]
 
   def builder[A](implicit ordering: Ordering[A]): Builder[A, TreeSet[A]] = ???
 
+  def constrainedFromIterable[E, To](it: strawman.collection.Iterable[E])(implicit ev: Build[E, To]): To = ???
 }

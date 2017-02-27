@@ -2,7 +2,9 @@ organization in ThisBuild := "ch.epfl.scala"
 
 version in ThisBuild := "0.1-SNAPSHOT"
 
-scalaVersion in ThisBuild := "2.12.1"
+resolvers in ThisBuild += "scala-pr" at "https://scala-ci.typesafe.com/artifactory/scala-pr-validation-snapshots"
+
+scalaVersion in ThisBuild := "2.12.2-ebe1180-SNAPSHOT" // "2.12.1"
 
 scalacOptions in ThisBuild ++=
   Seq("-deprecation", "-unchecked", "-Yno-imports", "-language:higherKinds")
@@ -18,7 +20,7 @@ val collections =
     .settings(
       name := "collection-strawman",
       libraryDependencies ++= Seq(
-        "org.scala-lang.modules" %% "scala-java8-compat" % "0.8.0",
+        "org.scala-lang.modules" % "scala-java8-compat_2.12" % "0.8.0",
         "com.novocode" % "junit-interface" % "0.11" % Test
       ),
       credentials ++= (
