@@ -1,6 +1,6 @@
 package strawman
 
-import scala.{AnyVal, Array, Char, Int, Unit}
+import scala.{AnyVal, Array, Char, Int, Unit, Any}
 import scala.Predef.String
 import scala.reflect.ClassTag
 
@@ -83,6 +83,7 @@ import scala.reflect.ClassTag
  */
 package object collection extends LowPriority {
   import scala.language.implicitConversions
+
   // ------------------ Decorators to add collection ops to existing types -----------------------
 
   /** Decorator to add collection operations to strings. */

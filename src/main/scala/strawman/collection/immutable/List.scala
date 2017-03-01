@@ -1,7 +1,7 @@
 package strawman.collection.immutable
 
 import scala.annotation.unchecked.uncheckedVariance
-import scala.Nothing
+import scala.{Nothing, Any}
 import scala.Predef.???
 import strawman.collection
 import strawman.collection.{IterableFactory, IterableOnce, LinearSeq, SeqLike}
@@ -51,7 +51,7 @@ case object Nil extends List[Nothing] {
   override def tail = ???
 }
 
-object List extends IterableFactory[List] {
+object List extends IterableFactory[Any, List] {
   def fromIterable[B](coll: collection.Iterable[B]): List[B] = coll match {
     case coll: List[B] => coll
     case _ => ListBuffer.fromIterable(coll).toList

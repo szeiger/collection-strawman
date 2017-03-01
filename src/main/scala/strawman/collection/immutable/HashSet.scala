@@ -2,7 +2,7 @@ package strawman.collection.immutable
 
 import strawman.collection.{IterableFactory, Iterator}
 
-import scala.Boolean
+import scala.{Boolean, Any, Int}
 import scala.Predef.???
 
 /** An immutable Set backed by a hash trie */
@@ -13,6 +13,8 @@ class HashSet[A] extends Set[A] with SetLike[A, HashSet] {
 
   // From IterablePolyTransforms
   def fromIterable[B](coll: strawman.collection.Iterable[B]): HashSet[B] = ???
+
+  // From IterableMonoTransforms
   protected[this] def fromIterableWithSameElemType(coll: strawman.collection.Iterable[A]): HashSet[A] = fromIterable(coll)
 
   // From SetLike
@@ -29,8 +31,6 @@ class HashSet[A] extends Set[A] with SetLike[A, HashSet] {
 
 }
 
-object HashSet extends IterableFactory[HashSet] {
-
+object HashSet extends IterableFactory[Any, HashSet] {
   def fromIterable[B](it: strawman.collection.Iterable[B]): HashSet[B] = ???
-
 }

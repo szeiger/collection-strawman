@@ -26,7 +26,7 @@ trait Iterable[+A] extends IterableOnce[A] with IterableLike[A, Iterable] {
   *
   */
 trait IterableLike[+A, +C[X] <: Iterable[X]]
-  extends FromIterable[C]
+  extends FromIterable[Any, C]
     with IterableOps[A]
     with IterableMonoTransforms[A, C[A @uncheckedVariance]] // sound bcs of VarianceNote
     with IterablePolyTransforms[A, C] {
@@ -38,15 +38,15 @@ trait IterableLike[+A, +C[X] <: Iterable[X]]
 }
 
 /** Base trait for instances that can construct a collection from an iterable */
-trait FromIterable[+C[X] <: Iterable[X]] {
-  def fromIterable[B](it: Iterable[B]): C[B]
+trait FromIterable[-B, +C[E <: B] <: Iterable[E @uncheckedVariance]] {
+  def fromIterable[E <: B](it: Iterable[E]): C[E]
 }
 
 /** Base trait for companion objects of collections */
-trait IterableFactory[+C[X] <: Iterable[X]] extends FromIterable[C] {
-  def empty[X]: C[X] = fromIterable(View.Empty)
-  def apply[A](xs: A*): C[A] = fromIterable(View.Elems(xs: _*))
-  def fill[A](n: Int)(elem: => A): C[A] = fromIterable(View.Fill(n)(elem))
+trait IterableFactory[-B, +C[E <: B] <: Iterable[E @uncheckedVariance]] extends FromIterable[B, C] {
+  def empty[E <: B]: C[E] = fromIterable(View.Empty)
+  def apply[E <: B](xs: E*): C[E] = fromIterable(View.Elems(xs: _*))
+  def fill[E <: B](n: Int)(elem: => E): C[E] = fromIterable(View.Fill(n)(elem))
 }
 
 /** Operations over iterables. No operation defined here is generic in the
@@ -98,7 +98,7 @@ trait IterableOps[+A] extends Any {
     *      xs.to(List)
     *      xs.to(ArrayBuffer)
     */
-  def to[C[X] <: Iterable[X]](fi: FromIterable[C]): C[A @uncheckedVariance] =
+  def to[E, C[E <: A] <: Iterable[E]](fi: FromIterable[A, C]): C[A @uncheckedVariance] =
   // variance seems sound because `to` could just as well have been added
   // as a decorator. We should investigate this further to be sure.
     fi.fromIterable(coll)

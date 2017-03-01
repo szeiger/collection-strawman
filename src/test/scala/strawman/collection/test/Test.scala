@@ -320,6 +320,12 @@ class StrawmanTest {
     val m3t: immutable.SortedSet[String] = m3
   }
 
+  def bitSet: Unit = {
+    val l = List(1,2,3)
+    val s1 = l.to(immutable.BitSet)
+    val s1t: immutable.BitSet = s1
+  }
+
   def mapOps(xs: Map[Int, String]): Unit = {
     val xs1 = xs.map((k, v) => (v, k))
     val xs2: strawman.collection.Map[String, Int] = xs1

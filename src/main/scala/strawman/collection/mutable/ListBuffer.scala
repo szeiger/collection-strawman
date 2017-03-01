@@ -1,6 +1,6 @@
 package strawman.collection.mutable
 
-import scala.{Int, Unit, Boolean}
+import scala.{Int, Unit, Boolean, Any}
 import scala.Int._
 import strawman.collection
 import strawman.collection.{Iterator, IterableOnce, IterableFactory, SeqLike}
@@ -197,6 +197,6 @@ class ListBuffer[A]
   override def className = "ListBuffer"
 }
 
-object ListBuffer extends IterableFactory[ListBuffer] {
+object ListBuffer extends IterableFactory[Any, ListBuffer] {
   def fromIterable[B](coll: collection.Iterable[B]): ListBuffer[B] = new ListBuffer[B] ++= coll
 }
