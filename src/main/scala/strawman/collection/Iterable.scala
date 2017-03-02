@@ -38,12 +38,15 @@ trait IterableLike[+A, +C[X] <: Iterable[X]]
 }
 
 /** Base trait for instances that can construct a collection from an iterable */
-trait FromIterable[-B, +C[E <: B] <: Iterable[E @uncheckedVariance]] {
+trait FromIterable[-B, +C[E]] {
   def fromIterable[E <: B](it: Iterable[E]): C[E]
 }
 
 /** Base trait for companion objects of collections */
-trait IterableFactory[-B, +C[E <: B] <: Iterable[E @uncheckedVariance]] extends FromIterable[B, C] {
+trait IterableFactory[-B, +C[E]] extends FromIterable[B, C] {
+  // In cases where the companion object implements IterableFactory, this is automatically in scope:
+  implicit def iterableFactory: IterableFactory[B, C] = this
+
   def empty[E <: B]: C[E] = fromIterable(View.Empty)
   def apply[E <: B](xs: E*): C[E] = fromIterable(View.Elems(xs: _*))
   def fill[E <: B](n: Int)(elem: => E): C[E] = fromIterable(View.Fill(n)(elem))
@@ -98,7 +101,7 @@ trait IterableOps[+A] extends Any {
     *      xs.to(List)
     *      xs.to(ArrayBuffer)
     */
-  def to[E, C[E <: A] <: Iterable[E]](fi: FromIterable[A, C]): C[A @uncheckedVariance] =
+  def to[E, C[E] <: Iterable[E]](fi: FromIterable[A, C]): C[A @uncheckedVariance] =
   // variance seems sound because `to` could just as well have been added
   // as a decorator. We should investigate this further to be sure.
     fi.fromIterable(coll)
@@ -107,11 +110,6 @@ trait IterableOps[+A] extends Any {
   def toArray[B >: A: ClassTag]: Array[B] =
     if (knownSize >= 0) copyToArray(new Array[B](knownSize), 0)
     else ArrayBuffer.fromIterable(coll).toArray[B]
-
-  // Just to test what's possible with the preferred and fallback types. This should be changed
-  // to require an `fi.BuildPreferred` to that it can't fall back to the unconstrained type.
-  def to[To](fi: ConstrainedFromIterable)(implicit build: fi.Build[A @uncheckedVariance, To]): To =
-    fi.constrainedFromIterable(coll)
 
   /** Copy all elements of this collection to array `xs`, starting at `start`. */
   def copyToArray[B >: A](xs: Array[B], start: Int = 0): xs.type = {

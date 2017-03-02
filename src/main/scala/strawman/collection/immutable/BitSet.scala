@@ -33,7 +33,7 @@ object BitSet extends IterableFactory[Int, BitSetHelper.BitSetCons] {
   def fromIterable[E <: Int](it: strawman.collection.Iterable[E]): BitSetHelper.BitSetCons[E] = ???
 }
 
-object BitSetHelper {
+private[collection] object BitSetHelper {
   // A unary type constructor for BitSet
-  type BitSetCons[X <: Int] = BitSet with strawman.collection.Iterable[X]
+  type BitSetCons[X] = BitSet with strawman.collection.Iterable[X]
 }

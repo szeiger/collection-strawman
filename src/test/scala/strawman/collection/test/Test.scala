@@ -306,18 +306,18 @@ class StrawmanTest {
     val xs1 = xs.map((x: Int) => x.toString) // TODO Remove type annotation when https://github.com/scala/scala/pull/5708 is published
     val xs2: immutable.SortedSet[String] = xs1
     val l = List(1,2,3)
-    val s1 = l.to(immutable.TreeSet)
-    val s2 = (l: List[Any]).to(immutable.TreeSet)
-    val s3 = l.to(immutable.SortedSet)
+    val s1 = l.to(immutable.TreeSet.factory)
+    //val s2 = (l: List[Any]).to(immutable.TreeSet)
+    //val s3 = l.to(immutable.SortedSet)
     val s1t: immutable.TreeSet[Int] = s1
-    val s2t: immutable.Set[Any] = s2
-    val s3t: immutable.SortedSet[Int] = s3
+    //val s2t: immutable.Set[Any] = s2
+    //val s3t: immutable.SortedSet[Int] = s3
     val m1 = s1.map(x => x.toString)
     val m1t: immutable.TreeSet[String] = m1
-    val m2 = s1.map(x => (x: Any))
-    val m2t: immutable.Set[Any] = m2
-    val m3 = s3.map(x => x.toString)
-    val m3t: immutable.SortedSet[String] = m3
+    //val m2 = s1.map(x => (x: Any))
+    //val m2t: immutable.Set[Any] = m2
+    //val m3 = s3.map(x => x.toString)
+    //val m3t: immutable.SortedSet[String] = m3
   }
 
   def bitSet: Unit = {
