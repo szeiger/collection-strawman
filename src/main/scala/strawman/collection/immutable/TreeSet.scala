@@ -2,7 +2,7 @@ package strawman
 package collection
 package immutable
 
-import mutable.Builder
+import mutable.{ArrayBuffer, Builder}
 import immutable.{RedBlackTree => RB}
 
 import scala.{Boolean, Int, NullPointerException, Option, Ordering, Some, Unit}
@@ -63,6 +63,8 @@ final class TreeSet[A] private (tree: RB.Tree[A, Unit])(implicit val ordering: O
 
   def iterableFactory = Set
 
+  def sortedIterableFactory = TreeSet
+
   protected[this] def fromSpecificIterable(coll: strawman.collection.Iterable[A]): TreeSet[A] =
     TreeSet.sortedFromIterable(coll)
 
@@ -103,7 +105,7 @@ final class TreeSet[A] private (tree: RB.Tree[A, Unit])(implicit val ordering: O
     else newSet(RB.delete(tree, elem))
 }
 
-object TreeSet extends SortedIterableFactory[TreeSet] {
+object TreeSet extends SortedIterableFactoryWithBuilder[TreeSet] {
 
   def empty[A: Ordering]: TreeSet[A] = new TreeSet[A]
 
@@ -113,4 +115,5 @@ object TreeSet extends SortedIterableFactory[TreeSet] {
       case _ => empty[E] ++ it
     }
 
+  def newBuilder[A : Ordering](): Builder[A, TreeSet[A]] = new ArrayBuffer[A].mapResult(sortedFromIterable[A] _)
 }
