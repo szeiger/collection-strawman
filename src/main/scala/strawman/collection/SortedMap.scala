@@ -16,6 +16,8 @@ trait SortedMapOps[K, +V, +CC[X, Y] <: SortedMap[X, Y] with SortedMapOps[X, Y, C
 
   def sortedIterableFactory = SortedSet
 
+  def sortedMapFactory: SortedMapFactory[CC]
+
   protected[this] def sortedMapFromIterable[K2, V2](it: collection.Iterable[(K2, V2)])(implicit ordering: Ordering[K2]): CC[K2, V2]
 
   def firstKey: K = head._1
