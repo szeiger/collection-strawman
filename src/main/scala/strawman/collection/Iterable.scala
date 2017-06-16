@@ -254,9 +254,6 @@ trait IterableOps[+A, +CC[X], +C] extends Any {
 
 /** Base trait for strict collections that can be built using a builder.
   *
-  * All factories provided by such a collection must be of the `*WithBuilder` variant
-  * even though this is not formally enforced through types.
-  *
   * @tparam  A    the element type of the collection
   * @tparam C  the type of the underlying collection
   */

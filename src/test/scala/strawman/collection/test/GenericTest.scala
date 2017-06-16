@@ -30,10 +30,10 @@ object Parse {
     }
   }
 
-  def parseCollection[A, C](bf: BuildFrom[Any, A, C])
-                                    (implicit parseA: Parse[A]): Parse[C] = { (s: String) =>
+  def parseCollection[A, C](bf: FromSpecificIterable[A, C])
+                           (implicit parseA: Parse[A]): Parse[C] = { (s: String) =>
     val parts = s.split("\\|")
-    parts.foldLeft[Option[Builder[A, C]]](Some(Builder.from(bf, null))) { (maybeBuilder, s) =>
+    parts.foldLeft[Option[Builder[A, C]]](Some(bf.newBuilder)) { (maybeBuilder, s) =>
       (maybeBuilder, parseA.parse(s)) match {
         case (Some(builder), Some(a)) =>
           scala.Predef.println(a)

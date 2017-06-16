@@ -124,7 +124,7 @@ class ArrayBuffer[A] private (initElems: Array[AnyRef], initLength: Int)
   override def className = "ArrayBuffer"
 }
 
-object ArrayBuffer extends IterableFactoryWithBuilder[ArrayBuffer] {
+object ArrayBuffer extends IterableFactory[ArrayBuffer] {
 
   /** Avoid reallocation of buffer if length is known. */
   def fromIterable[B](coll: collection.Iterable[B]): ArrayBuffer[B] =
@@ -136,7 +136,7 @@ object ArrayBuffer extends IterableFactoryWithBuilder[ArrayBuffer] {
     }
     else new ArrayBuffer[B] ++= coll
 
-  def newBuilder[A](): Builder[A, ArrayBuffer[A]] = new ArrayBuffer[A]()
+  override def newBuilder[A](): Builder[A, ArrayBuffer[A]] = new ArrayBuffer[A]()
 
   def empty[A]: ArrayBuffer[A] = new ArrayBuffer[A]()
 }

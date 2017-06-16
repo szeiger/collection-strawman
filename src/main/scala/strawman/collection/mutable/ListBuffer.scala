@@ -200,11 +200,11 @@ class ListBuffer[A]
   override def className = "ListBuffer"
 }
 
-object ListBuffer extends IterableFactoryWithBuilder[ListBuffer] {
+object ListBuffer extends IterableFactory[ListBuffer] {
 
   def fromIterable[A](coll: collection.Iterable[A]): ListBuffer[A] = new ListBuffer[A] ++= coll
 
-  def newBuilder[A](): Builder[A, ListBuffer[A]] = new ListBuffer[A]
+  override def newBuilder[A](): Builder[A, ListBuffer[A]] = new ListBuffer[A]
 
   def empty[A]: ListBuffer[A] = new ListBuffer[A]
 }

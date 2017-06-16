@@ -6,7 +6,7 @@ import org.junit.Test
 import strawman.collection._
 import strawman.collection.mutable.{ArrayBuffer, Builder, Growable}
 
-import scala.{Any, Either, Int, Left, None, Option, Right, Some, Unit, PartialFunction, Boolean}
+import scala.{Either, Int, Left, None, Option, Right, Some, Unit, PartialFunction, Boolean}
 import java.lang.String
 import scala.Predef.ArrowAssoc
 import scala.math.Ordering
@@ -15,32 +15,32 @@ class TraverseTest {
 
   // You can either overload methods for IterableOps and Iterable with SortedOps (if you want to support constrained collection types)
   def optionSequence1[C[X] <: IterableOps[X, C, _], A](xs: C[Option[A]]): Option[C[A]] =
-    xs.foldLeft[Option[Builder[A, C[A]]]](Some(Builder.from[A, C](xs.iterableFactory))) {
+    xs.foldLeft[Option[Builder[A, C[A]]]](Some(xs.iterableFactory.newBuilder[A]())) {
       case (Some(builder), Some(a)) => Some(builder += a)
       case _ => None
     }.map(_.result)
   def optionSequence1[C[X] <: Iterable[X] with SortedOps[X, C[X], C], A : Ordering](xs: C[Option[A]]): Option[C[A]] =
-    xs.foldLeft[Option[Builder[A, C[A]]]](Some(Builder.from[A, C](xs.sortedIterableFactory))) {
+    xs.foldLeft[Option[Builder[A, C[A]]]](Some(xs.sortedIterableFactory.newBuilder[A]())) {
       case (Some(builder), Some(a)) => Some(builder += a)
       case _ => None
     }.map(_.result)
 
   // ...or use BuildFrom to abstract over both and also allow building arbitrary collection types
   def optionSequence2[CC[X] <: Iterable[X], A, To](xs: CC[Option[A]])(implicit bf: BuildFrom[CC[Option[A]], A, To]): Option[To] =
-    xs.foldLeft[Option[Builder[A, To]]](Some(Builder.from(bf, xs))) {
+    xs.foldLeft[Option[Builder[A, To]]](Some(bf.newBuilder(xs))) {
       case (Some(builder), Some(a)) => Some(builder += a)
       case _ => None
     }.map(_.result)
 
   // Using dependent types:
   def optionSequence3[A, To](xs: Iterable[Option[A]])(implicit bf: BuildFrom[xs.type, A, To]): Option[To] =
-    xs.foldLeft[Option[Builder[A, To]]](Some(Builder.from[xs.type, A, To](bf, xs))) {
+    xs.foldLeft[Option[Builder[A, To]]](Some(bf.newBuilder(xs))) {
       case (Some(builder), Some(a)) => Some(builder += a)
       case _ => None
     }.map(_.result)
 
   def eitherSequence[A, B, To](xs: Iterable[Either[A, B]])(implicit bf: BuildFrom[xs.type, B, To]): Either[A, To] =
-    xs.foldLeft[Either[A, Builder[B, To]]](Right(Builder.from[xs.type, B, To](bf, xs))) {
+    xs.foldLeft[Either[A, Builder[B, To]]](Right(bf.newBuilder(xs))) {
       case (Right(builder), Right(b)) => Right(builder += b)
       case (Left(a)       ,        _) => Left(a)
       case (_             ,  Left(a)) => Left(a)
@@ -104,7 +104,7 @@ class TraverseTest {
   // From https://github.com/scala/collection-strawman/issues/44
   def flatCollect[A, B, To](coll: Iterable[A])(f: PartialFunction[A, IterableOnce[B]])
                        (implicit bf: BuildFrom[coll.type, B, To]): To = {
-    val builder = Builder.from[coll.type, B, To](bf, coll)
+    val builder = bf.newBuilder(coll)
     for (a <- coll) {
       if (f.isDefinedAt(a)) builder ++= f(a)
     }
@@ -113,8 +113,8 @@ class TraverseTest {
 
   def mapSplit[A, B, C, ToL, ToR](coll: Iterable[A])(f: A => Either[B, C])
               (implicit bfLeft:  BuildFrom[coll.type, B, ToL], bfRight: BuildFrom[coll.type, C, ToR]): (ToL, ToR) = {
-    val left = Builder.from[coll.type, B, ToL](bfLeft, coll)
-    val right = Builder.from[coll.type, C, ToR](bfRight, coll)
+    val left = bfLeft.newBuilder(coll)
+    val right = bfRight.newBuilder(coll)
     for (a <- coll)
       f(a).fold(left.add, right.add)
     (left.result, right.result)

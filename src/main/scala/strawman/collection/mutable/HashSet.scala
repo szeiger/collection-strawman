@@ -75,12 +75,12 @@ final class HashSet[A](contents: FlatHashTable.Contents[A])
 
 }
 
-object HashSet extends IterableFactoryWithBuilder[HashSet] {
+object HashSet extends IterableFactory[HashSet] {
 
   def fromIterable[B](it: strawman.collection.Iterable[B]): HashSet[B] = Growable.fromIterable(empty[B], it)
 
   def empty[A]: HashSet[A] = new HashSet[A]
 
-  def newBuilder[A](): Builder[A, HashSet[A]] = new GrowableBuilder[A, HashSet[A]](empty)
+  override def newBuilder[A](): Builder[A, HashSet[A]] = new GrowableBuilder[A, HashSet[A]](empty)
 
 }

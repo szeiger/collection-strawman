@@ -1,7 +1,7 @@
 package strawman
 package collection.mutable
 
-import collection.SortedIterableFactoryWithBuilder
+import collection.SortedIterableFactory
 import collection.mutable.{RedBlackTree => RB}
 
 import scala.{Boolean, Int, None, Null, NullPointerException, Option, Ordering, Serializable, SerialVersionUID, Some, Unit}
@@ -177,11 +177,9 @@ sealed class TreeSet[A] private (tree: RB.Tree[A, Null])(implicit val ordering: 
   * @author Lucien Pereira
   *
   */
-object TreeSet extends SortedIterableFactoryWithBuilder[TreeSet] {
+object TreeSet extends SortedIterableFactory[TreeSet] {
 
   def empty[A : Ordering]: TreeSet[A] = new TreeSet[A]()
 
   def sortedFromIterable[E : Ordering](it: collection.Iterable[E]): TreeSet[E] = Growable.fromIterable(empty[E], it)
-
-  def newBuilder[A : Ordering](): Builder[A, TreeSet[A]] = new ArrayBuffer[A].mapResult(sortedFromIterable[A] _)
 }

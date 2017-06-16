@@ -3,7 +3,7 @@ package strawman.collection.mutable
 import scala.{Any, Boolean, Char, Unit}
 import java.lang.String
 
-import strawman.collection.{BuildFrom, IterableFactory, IterableFactoryWithBuilder, IterableOnce, SortedIterableFactory, StrictBuildFrom}
+import strawman.collection.IterableOnce
 
 import scala.math.Ordering
 
@@ -24,29 +24,6 @@ trait Builder[-A, +To] extends Growable[A] { self =>
     def clear(): Unit = self.clear()
     override def addAll(xs: IterableOnce[A]): this.type = { self ++= xs; this }
     def result(): NewTo = f(self.result())
-  }
-}
-
-object Builder {
-  /** Get a proper builder for an IterableFactoryWithBuilder, otherwise a Builder that uses an intermediate
-    * ArrayBuffer to store the elements. */
-  def from[A, CC[_]](fact: IterableFactory[CC]): Builder[A, CC[A]] = fact match {
-    case fact: IterableFactoryWithBuilder[CC] => fact.newBuilder[A]()
-    case fact => new ArrayBuffer[A]().mapResult(fact.fromIterable _)
-  }
-
-  /** Get a proper builder for a SortedIterableFactoryWithBuilder, otherwise a Builder that uses an intermediate
-    * ArrayBuffer to store the elements. */
-  def from[A : Ordering, CC[_]](fact: SortedIterableFactory[CC]): Builder[A, CC[A]] = fact match {
-    case fact: IterableFactoryWithBuilder[CC] => fact.newBuilder[A]()
-    case fact => new ArrayBuffer[A]().mapResult(fact.sortedFromIterable[A] _)
-  }
-
-  /** Get a proper builder for a StrictBuildFrom, otherwise a Builder that uses an intermediate
-    * ArrayBuffer to store the elements. */
-  def from[From, A, C](bf: BuildFrom[From, A, C], from: From): Builder[A, C] = bf match {
-    case bf: StrictBuildFrom[From, A, C] => bf.newBuilder(from)
-    case bf => new ArrayBuffer[A]().mapResult(bf.fromSpecificIterable(from) _)
   }
 }
 
